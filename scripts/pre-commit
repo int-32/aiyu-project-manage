@@ -1,0 +1,76 @@
+#!/bin/bash
+# 提交前自动检查
+# 安装方式：cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+ERRORS=()
+
+# 1. 模块边界检查
+if [ -f "scripts/check_boundaries.py" ]; then
+    python scripts/check_boundaries.py > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        ERRORS+=("模块边界检查未通过，运行 python scripts/check_boundaries.py 查看详情")
+    fi
+fi
+
+# 2. lint 检查
+if command -v ruff &> /dev/null; then
+    ruff check . --quiet > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        ERRORS+=("Lint 检查未通过，运行 ruff check . 查看详情")
+    fi
+fi
+
+# 3. 类型检查
+if command -v pyright &> /dev/null; then
+    pyright --outputjson 2>/dev/null | python -c "
+import json, sys
+data = json.load(sys.stdin)
+if data.get('summary', {}).get('errorCount', 0) > 0:
+    sys.exit(1)
+" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        ERRORS+=("类型检查未通过，运行 pyright 查看详情")
+    fi
+fi
+
+# 4. 改了 model.py 必须有测试变更
+CHANGED_MODELS=$(git diff --cached --name-only | grep "model\.py$")
+if [ -n "$CHANGED_MODELS" ]; then
+    CHANGED_TESTS=$(git diff --cached --name-only | grep "test_")
+    if [ -z "$CHANGED_TESTS" ]; then
+        ERRORS+=("修改了 model.py 但没有更新测试文件")
+    fi
+fi
+
+# 5. 新模块必须有 __init__.py 和 CLAUDE.md
+NEW_MODULES=$(git diff --cached --name-only --diff-filter=A | grep "^app/[a-z]*/model\.py$" | sed 's|/model\.py||')
+for module in $NEW_MODULES; do
+    if ! git diff --cached --name-only | grep -q "$module/__init__.py"; then
+        ERRORS+=("新模块 $module 缺少 __init__.py 职责声明")
+    fi
+    if ! git diff --cached --name-only | grep -q "$module/CLAUDE.md"; then
+        ERRORS+=("新模块 $module 缺少 CLAUDE.md")
+    fi
+done
+
+# 6. 改了副作用定义必须改 service
+SIDE_EFFECT_CHANGES=$(git diff --cached -U0 | grep "+.*TRANSITION_SIDE_EFFECTS")
+if [ -n "$SIDE_EFFECT_CHANGES" ]; then
+    SERVICE_CHANGES=$(git diff --cached --name-only | grep "service\.py$")
+    if [ -z "$SERVICE_CHANGES" ]; then
+        ERRORS+=("修改了 TRANSITION_SIDE_EFFECTS 但没有更新 service.py 的 handler")
+    fi
+fi
+
+if [ ${#ERRORS[@]} -gt 0 ]; then
+    echo "提交被拦截："
+    echo ""
+    for err in "${ERRORS[@]}"; do
+        echo "  ✗ $err"
+    done
+    echo ""
+    echo "修复后重新提交。如确认无需修改，使用 git commit --no-verify 跳过。"
+    exit 1
+fi
+
+exit 0
