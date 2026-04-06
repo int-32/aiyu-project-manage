@@ -744,13 +744,16 @@ if [ -n "$CHANGED_MODELS" ]; then
 fi
 
 # 5. 新模块必须有 __init__.py 和 CLAUDE.md
-NEW_MODULES=$(git diff --cached --name-only --diff-filter=A | grep "^app/[a-z]*/model\.py$" | sed 's|/model\.py||')
+NEW_MODULES=$(git diff --cached --name-only --diff-filter=A | grep "^app/[a-z][a-z0-9_]*/model\.py$" | sed 's|/model\.py||')
 for module in $NEW_MODULES; do
     if ! git diff --cached --name-only | grep -q "$module/__init__.py"; then
         ERRORS+=("新模块 $module 缺少 __init__.py 职责声明")
     fi
     if ! git diff --cached --name-only | grep -q "$module/CLAUDE.md"; then
         ERRORS+=("新模块 $module 缺少 CLAUDE.md")
+    fi
+    if ! git diff --cached --name-only | grep -q "$module/tests/"; then
+        ERRORS+=("新模块 $module 缺少 tests/ 测试目录")
     fi
 done
 

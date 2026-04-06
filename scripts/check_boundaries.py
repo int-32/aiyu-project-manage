@@ -1,11 +1,13 @@
 """
-模块边界检查脚本。
+模块边界和结构完整性检查脚本。
 
 检查以下规则：
 1. 不允许跨模块直接导入 DAO（只能通过 Service 调用）
 2. Service 层不允许直接使用 db.query() / session.query() / session.execute()
 3. Router 层不允许直接导入 DAO
 4. Router 层不允许直接使用 db.query()
+5. 每个模块必须包含 CLAUDE.md
+6. 每个模块必须包含 tests/ 目录及基本测试文件
 
 用法：python scripts/check_boundaries.py
 退出码：0 = 无违规，1 = 发现违规
@@ -99,6 +101,26 @@ def check_router_dao_import(
     return errors
 
 
+def check_module_structure(module_dir: Path) -> list[str]:
+    """检查模块结构完整性：CLAUDE.md 和 tests/ 是否存在"""
+    errors = []
+    module_name = module_dir.name
+
+    if not (module_dir / "CLAUDE.md").exists():
+        errors.append(f"  {module_dir}/CLAUDE.md: 模块缺少 CLAUDE.md 文件")
+
+    tests_dir = module_dir / "tests"
+    if not tests_dir.exists():
+        errors.append(f"  {module_dir}/tests/: 模块缺少 tests/ 测试目录")
+    else:
+        if not (tests_dir / "test_dao.py").exists():
+            errors.append(f"  {tests_dir}/test_dao.py: 模块缺少 DAO 层测试")
+        if not (tests_dir / "test_service.py").exists():
+            errors.append(f"  {tests_dir}/test_service.py: 模块缺少 Service 层测试")
+
+    return errors
+
+
 def check_file(filepath: Path, current_module: str, all_modules: list[str]) -> list[str]:
     """检查单个文件"""
     errors = []
@@ -144,6 +166,9 @@ def main() -> int:
     all_errors = []
     for module in modules:
         module_dir = app_dir / module
+        # 模块结构完整性检查
+        all_errors.extend(check_module_structure(module_dir))
+        # 导入边界检查
         for py_file in module_dir.rglob("*.py"):
             if "tests" in py_file.parts or "test_" in py_file.name:
                 continue
