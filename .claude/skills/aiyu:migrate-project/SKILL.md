@@ -1,5 +1,5 @@
 ---
-name: migrate-project
+name: aiyu:migrate-project
 description: >
   将已有的 Python FastAPI 项目迁移到标准化架构。
   逐步进行，不停业务，不破坏现有功能。
@@ -118,8 +118,8 @@ addopts = -v --tb=short
 
 - scripts/check_boundaries.py（模块边界检查）
 - scripts/pre-commit（git pre-commit hook）
-- .claude/skills/add-module/SKILL.md
-- .claude/skills/entropy-review/SKILL.md
+- .claude/skills/aiyu:add-module/SKILL.md
+- .claude/skills/aiyu:entropy-review/SKILL.md
 - .claude/settings.json（Claude Code 提交前提醒 hook）
 - docs/migration/（迁移文档目录）
 
@@ -151,8 +151,8 @@ chmod +x .git/hooks/pre-commit
 - 不要主动重构未迁移的代码
 - 对未迁移代码的功能修改在旧位置进行
 - 迁移工作与功能开发分开，不在同一个会话中混做
-- 需要创建新的业务模块时，必须使用 /add-module，不要手动创建模块目录结构
-- 定期运行 /entropy-review 进行项目健康度审计
+- 需要创建新的业务模块时，必须使用 /aiyu:add-module，不要手动创建模块目录结构
+- 定期运行 /aiyu:entropy-review 进行项目健康度审计
 
 ## 架构规范
 （迁移完成后的目标架构，同 init-project 中的描述）
@@ -336,7 +336,7 @@ git commit -m "refactor: migrate {module} to modular architecture"
 
 1. 删除 CLAUDE.md 中的"迁移状态"段落和"当前状态"段落
 2. 删除"不要主动重构未迁移的代码"规则
-3. 运行一次完整的熵减审计：/entropy-review
+3. 运行一次完整的熵减审计：/aiyu:entropy-review
 4. 清理 docs/migration/ 中的分析报告（可保留作历史参考）
 
 最终提交：

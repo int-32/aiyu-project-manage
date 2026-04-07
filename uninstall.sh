@@ -27,7 +27,7 @@ echo ""
 # 确认
 # ----------------------------------------
 echo "将卸载以下内容："
-echo "  - Skills: /init-project, /add-module, /entropy-review, /migrate-project"
+echo "  - Skills: /aiyu:init-project, /aiyu:add-module, /aiyu:entropy-review, /aiyu:migrate-project"
 echo "  - 脚本模板: $TEMPLATES_DIR/scripts/"
 echo "  - Claude Code hook: settings.json 中的提交提醒"
 echo ""
@@ -53,7 +53,7 @@ echo ""
 echo "--- 卸载 Skills ---"
 echo ""
 
-SKILLS=(init-project add-module entropy-review migrate-project)
+SKILLS=(aiyu:init-project aiyu:add-module aiyu:entropy-review aiyu:migrate-project)
 for skill in "${SKILLS[@]}"; do
     SKILL_DIR="$CLAUDE_SKILLS_DIR/$skill"
     if [ -d "$SKILL_DIR" ]; then

@@ -1,5 +1,5 @@
 ---
-name: entropy-review
+name: aiyu:entropy-review
 description: >
   项目熵减审计。检查代码一致性、CLAUDE.md 准确性、数据流完整性、
   死代码、测试健康度。当用户说"熵减"、"项目审计"、"检查项目健康度"时使用。

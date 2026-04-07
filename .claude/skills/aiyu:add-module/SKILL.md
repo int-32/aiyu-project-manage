@@ -1,5 +1,5 @@
 ---
-name: add-module
+name: aiyu:add-module
 description: >
   创建新的业务模块目录结构。当需要添加新模块、新建业务模块、
   创建新的 model/dao/service/router 结构、新增业务领域时自动使用。

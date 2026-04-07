@@ -1,5 +1,5 @@
 ---
-name: init-project
+name: aiyu:init-project
 description: >
   初始化一个新的 Python FastAPI 项目，搭建完整的基础设施。
   包括分层架构、公共基类、数据流模式、工具链配置、边界检查、
@@ -69,9 +69,9 @@ disable-model-invocation: true
 ├── .claude/
 │   ├── settings.json              # Claude Code hook（提交前提醒）
 │   └── skills/
-│       ├── add-module/
+│       ├── aiyu:add-module/
 │       │   └── SKILL.md
-│       └── entropy-review/
+│       └── aiyu:entropy-review/
 │           └── SKILL.md
 ├── CLAUDE.md
 ├── ruff.toml
@@ -645,9 +645,9 @@ pytest-asyncio>=0.23.0
 - `python scripts/check_boundaries.py`: 检查模块边界
 
 ## Skill 使用规则
-- 需要创建新的业务模块时，必须使用 /add-module，不要手动创建模块目录结构
-- 定期运行 /entropy-review 进行项目健康度审计
-- 已有项目迁移使用 /migrate-project
+- 需要创建新的业务模块时，必须使用 /aiyu:add-module，不要手动创建模块目录结构
+- 定期运行 /aiyu:entropy-review 进行项目健康度审计
+- 已有项目迁移使用 /aiyu:migrate-project
 
 ## 架构规范
 
@@ -834,7 +834,7 @@ chmod +x .git/hooks/pre-commit
 
 告诉用户：
 - 安装 pyright LSP 插件：`/plugin install pyright-lsp@claude-plugins-official`
-- 后续添加新模块：`/add-module`
-- 定期熵减审计（建议每两周）：`/entropy-review`
+- 后续添加新模块：`/aiyu:add-module`
+- 定期熵减审计（建议每两周）：`/aiyu:entropy-review`
 - 模块边界决策表在根 CLAUDE.md 中，遇到新的模糊边界时及时补充
 - 提交时 pre-commit hook 会自动检查一致性，无需手动记忆
